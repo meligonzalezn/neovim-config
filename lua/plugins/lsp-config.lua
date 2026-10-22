@@ -28,19 +28,9 @@ return {
       "williamboman/mason-lspconfig.nvim",
     },
     config = function()
-      local lspconfig = require("lspconfig")
-
-      local on_attach = function(_, bufnr)
-        local opts = { buffer = bufnr }
-
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
-      end
-
-      -- Lua
-      lspconfig.lua_ls.setup({
-        on_attach = on_attach,
+      -- nvim-lspconfig aporta los defaults de cada servidor; aquí solo se
+      -- ajusta lo propio y se activan (API vim.lsp.config de nvim 0.11+)
+      vim.lsp.config("lua_ls", {
         settings = {
           Lua = {
             diagnostics = {
@@ -50,33 +40,25 @@ return {
         },
       })
 
-      -- TypeScript / JavaScript
-      lspconfig.ts_ls.setup({
-        on_attach = on_attach,
-      })
+      vim.lsp.enable({ "lua_ls", "ts_ls", "html", "cssls", "eslint" })
 
-      -- HTML
-      lspconfig.html.setup({
-        on_attach = on_attach,
-      })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local opts = { buffer = args.buf }
 
-      -- CSS / SCSS
-      lspconfig.cssls.setup({
-        on_attach = on_attach,
-      })
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
 
-      -- ESLint
-      lspconfig.eslint.setup({
-        on_attach = function(client, bufnr)
-          on_attach(client, bufnr)
-
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = bufnr,
-            command = "EslintFixAll",
-          })
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client and client.name == "eslint" then
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              buffer = args.buf,
+              command = "EslintFixAll",
+            })
+          end
         end,
       })
     end,
   },
 }
-

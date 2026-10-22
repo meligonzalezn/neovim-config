@@ -1,15 +1,16 @@
 return {
   "nvim-treesitter/nvim-treesitter",
+  lazy = false,
   build = ":TSUpdate",
   config = function()
-    local ok_ts, ts_configs = pcall(require, "nvim-treesitter.configs")
-    if ok_ts then
-      ts_configs.setup({
-        ensure_installed = { "lua", "javascript" },
-        highlight = { enable = true },
-        indent = { enable = true },
-      })
-    end
+    -- rama main: sin `nvim-treesitter.configs`; se instala y se activa a mano
+    require("nvim-treesitter").install({ "lua", "javascript" })
+
+    vim.api.nvim_create_autocmd("FileType", {
+      callback = function(args)
+        -- pcall: filetypes sin parser simplemente no se resaltan
+        pcall(vim.treesitter.start, args.buf)
+      end,
+    })
   end,
 }
-
