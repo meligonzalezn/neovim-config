@@ -11,6 +11,8 @@ return {
     config = function()
       local ok_telescope, builtin = pcall(require, "telescope.builtin")
       if ok_telescope then
+        vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+        vim.keymap.set("n", "<leader>fr", builtin.lsp_references, {})
         vim.keymap.set("n", "<C-p>", function()
           builtin.find_files({
             hidden = false,

@@ -17,7 +17,10 @@ return {
           "html",
           "cssls",
           "eslint",
+          "jdtls",
         },
+        -- jdtls lo arranca nvim-jdtls desde ftplugin/java.lua
+        automatic_enable = { exclude = { "jdtls" } },
       })
     end,
   },
@@ -30,6 +33,11 @@ return {
     config = function()
       -- nvim-lspconfig aporta los defaults de cada servidor; aquí solo se
       -- ajusta lo propio y se activan (API vim.lsp.config de nvim 0.11+)
+      -- completado de blink.cmp para todos los servidores
+      vim.lsp.config("*", {
+        capabilities = require("blink.cmp").get_lsp_capabilities(),
+      })
+
       vim.lsp.config("lua_ls", {
         settings = {
           Lua = {
